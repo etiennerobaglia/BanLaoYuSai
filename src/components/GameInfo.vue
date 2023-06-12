@@ -1,38 +1,33 @@
 <template>
-  <div class="game-menu-info">
+  <Teleport 
+    to="#game-modal" 
+    v-if="playState != 
+    'notPlaying'"
+  >
+    <GameModal 
+      :nbSuccess="nbSuccess"
+      :nbFail="nbFail"
+      :bestScore="bestScore"
+      :totalAttemps="totalAttemps"
+    />
+  </Teleport>
+    
+  <GameFinished
+    v-if="playState == 'finished'"
+    @replay="replay()"
+    :nbSuccess="nbSuccess"
+    :totalAttemps="totalAttemps"    
+  />
 
-    <Teleport to="#game-modal" v-if="playState != 'notPlaying'">
-      <div class="game-modal-inner">
-        <div class="game-menu-scores">
-          <div class="game-menu-score">
-            <span>
-              <span class="green">■</span> 
-              Success
-            </span>
-            <span>{{ nbSuccess }}</span>
-          </div>
-          <div class="game-menu-score">
-            <span>
-              <span class="red">■</span> 
-              Failed
-            </span>
-            <span>{{ nbFail }}</span>
-          </div>
-        </div>
-        <div class="game-menu-best-score" v-if="bestScore != null"> 
-          Best Score: {{ bestScore }}/{{totalAttemps}}
-        </div>
-      </div>
-    </Teleport>
-
-    <div 
-      class="game-menu-instructions"
-      v-if="playState != 'finished' && playState != 'notPlaying'"
-    >
-
+  <div 
+    v-else-if="playState == 'playing' || playState == 'next'"
+    class="game-menu-info"
+  >
+    <div class="game-menu-instructions">
+      
       <div 
+        v-if="difficulty == 'hard'"
         class="game-menu-difficulty game-difficulty-hard" 
-        v-if="difficulty == 'hard' && guessingFeature.properties && playState!='finished'"
       >
 
         <div class="game-menu-instruction-text">
@@ -72,14 +67,15 @@
           disabled=true
           class="button button-selection button-not-hoverable button-red"
           v-html="featureFullName(guessedFeature)"
-        
         >
         </button>
 
       </div>
 
-      <div class="game-menu-difficulty game-difficulty-easy" v-if="difficulty == 'easy' && guessingFeature.properties && playState!='finished'">
-        
+      <div 
+        v-if="difficulty == 'easy'"
+        class="game-menu-difficulty game-difficulty-easy"
+      >
         <div class="game-menu-instruction-text">
           Find the name of the
           <span class="guessing-feature">yellow shape</span>:
@@ -87,15 +83,15 @@
         
         <div class="game-menu-buttons">
           <button
+            v-for="option in guessingOptions"
             :disabled="
               playState != 'playing'
             "
-            v-for="option in guessingOptions"
             class="button button-selection"
             :class="{
               'button-yellow-blue': 
-                !guessedFeature.id ||
-                ( option.id != guessedFeature.id)
+                !guessedFeature.id 
+                || option.id != guessedFeature.id
               ,
               'button-green':
                 option.id == guessingFeature.id
@@ -115,55 +111,43 @@
             v-html="featureFullName(option)"
           >
           </button>
-        
         </div>
       </div>
     </div>
 
     <div class="game-menu-feedback">
-
-      <button 
+      <button
+        v-if="nbSuccess + nbFail != totalAttemps"
         @click="next()"
         :disabled="playState != 'next'"
-        v-if="nbSuccess + nbFail != totalAttemps"
         class="button button-yellow button-next"
       >
       [{{ nbSuccess+nbFail }}/{{totalAttemps}}] Next Round!
       </button>
-
       <button
-        v-else-if="playState != 'finished'"
+        v-else
         @click="score()"
         class="button button-yellow button-next"
       >
         [{{ nbSuccess+nbFail }}/{{totalAttemps}}] See score!
       </button>
-
-      <div class="game-menu-finished" v-if="playState=='finished'">
-        Congratulation, your score is {{ nbSuccess }}/{{ totalAttemps }}!
-        <button 
-          @click="replay()"
-          class="button button-yellow"
-        >
-          Replay this mode!
-        </button>
-        <button 
-          @click="restart()"
-          class="button button-yellow"
-        >
-          Choose new game mode!
-        </button>
-      </div>
-
     </div>
+
   </div>
 </template>
 
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
+import GameModal from './GameModal.vue';
+import GameFinished from './GameFinished.vue';
 
 
 export default defineComponent({
+  name: 'GameInfo',
+  components: { 
+    GameModal,
+    GameFinished
+  },
   props: {
     mapPromise: Object,
     playgroundLayer: Object,
@@ -171,223 +155,146 @@ export default defineComponent({
     difficulty: String,
   },
   setup(props) {
-    let guessingOptions = ref([])
+    let guessingOptions = ref([]);
     let guessingFeature = ref({});
-    let guessedFeature = ref({})
+    let guessedFeature = ref({});
     let hoveredFeatureId = null;
     let nbFail = ref(0);
     let nbSuccess = ref(0);
-    let playState = ref('playing');
+    let playState = ref("playing");
     let success = ref(null);
-    let bestScore = ref(null)
-    let totalAttemps = ref(10)
-    let gameDoneFeaturesIDs = ref([])
-
-    onMounted(() => { play()});
-
+    let bestScore = ref(null);
+    let totalAttemps = ref(10);
+    let gameDoneFeaturesIDs = ref([]);
+    onMounted(() => { play(); });
     function play() {
       setRandomFeatures();
       playState.value = "playing";
     }
-
     function score() {
-        // end of game
-        playState.value = "finished";
-
-        // set bestscore
-        if (playState.value == "finished" && (nbSuccess.value > bestScore.value || bestScore.value == null))
+      // end of game
+      playState.value = "finished";
+      // set bestscore
+      if (playState.value == "finished" && (nbSuccess.value > bestScore.value || bestScore.value == null))
           bestScore.value = nbSuccess.value;
-        
-        next()
+      next();
     }
-
     function next() {
-
-      props.mapPromise.then((map)=> {
-        map.setFeatureState(
-          { source: props.playgroundLayer.name, id: guessedFeature.value.id },
-          { fail: false, guessing: false, success: false, hover: false }
-        )
-
-        map.setFeatureState(
-          { source: props.playgroundLayer.name, id: guessingFeature.value.id },
-          { fail: false, guessing: false, success: false, hover: false }
-        );
-
+      props.mapPromise.then((map) => {
+        map.setFeatureState({ source: props.playgroundLayer.name, id: guessedFeature.value.id }, { fail: false, guessing: false, success: false, hover: false });
+        map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { fail: false, guessing: false, success: false, hover: false });
         if (guessingFeature.value.id == guessedFeature.value.id) {
-          map.setFeatureState(
-            { source: props.playgroundLayer.name, id: guessingFeature.value.id },
-            { done: true }
-          );
+          map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { done: true });
         }
-
-        map.fitBounds(
-          props.playgroundInfo.bounds,
-          {padding: 0}
-        )
-
+        map.fitBounds(props.playgroundInfo.bounds, { padding: 0 });
         // game must go on
-        if (playState.value != "finished") play()
-
-      })
+        if (playState.value != "finished")
+          play();
+      });
     }
-
     function replay() {
       nbSuccess.value = 0;
       nbFail.value = 0;
-      props.mapPromise.then((map)=> {
-        map.removeFeatureState(
-          {source: props.playgroundLayer.name}
-        )
-        play()
-      })
+      props.mapPromise.then((map) => {
+        map.removeFeatureState({ source: props.playgroundLayer.name });
+        play();
+      });
     }
-
-    function restart() {
-      location.reload();
-    }
-
     function guess(guessAttempt) {
       if (
-        // playing
-        playState.value == 'playing'
+      // playing
+      playState.value == "playing"
         // not a done feature (hard)
-        && (!gameDoneFeaturesIDs.value.includes(guessAttempt.id) || props.difficulty == 'easy')
-      ) {
-        guessedFeature.value = guessAttempt
+        && (!gameDoneFeaturesIDs.value.includes(guessAttempt.id) || props.difficulty == "easy")) {
+        guessedFeature.value = guessAttempt;
         playState.value = "next";
-  
-        props.mapPromise.then((map)=> {
-  
+        props.mapPromise.then((map) => {
           // success
           if (guessedFeature.value.id == guessingFeature.value.id) {
-            nbSuccess.value ++;
+            nbSuccess.value++;
             success.value = true;
-            
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: guessingFeature.value.id },
-              { guessing: false, success: true }
-            );
-  
-            gameDoneFeaturesIDs.value.push(guessedFeature.value.id)
+            map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: false, success: true });
+            gameDoneFeaturesIDs.value.push(guessedFeature.value.id);
           }
-  
           // fail
           else {
-            nbFail.value ++;
+            nbFail.value++;
             success.value = false;
-  
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: guessedFeature.value.id },
-              { fail: true }
-            )
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: guessingFeature.value.id },
-              { guessing: true }
-            )
+            map.setFeatureState({ source: props.playgroundLayer.name, id: guessedFeature.value.id }, { fail: true });
+            map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: true });
           }
-        })
+        });
       }
     }
-
     function featureFullName(feature) {
       let featureFullName;
       if (feature.properties?.vname)
-        featureFullName = 
-          feature.properties?.vname + " <br /> " + feature.properties?.l_vname 
+        featureFullName =
+          feature.properties?.vname + " <br /> " + feature.properties?.l_vname;
       else if (feature.properties?.dname)
-          featureFullName = 
-          feature.properties?.dname + " <br /> " + feature.properties?.l_dname
+        featureFullName =
+          feature.properties?.dname + " <br /> " + feature.properties?.l_dname;
       else if (feature.properties?.pname)
-        featureFullName = 
+        featureFullName =
           feature.properties?.pname + " <br /> " + feature.properties?.l_pname;
-      return featureFullName
+      return featureFullName;
     }
-
     function setRandomFeatures() {
       let newFeature;
       let newFeatures;
-    
-      props.mapPromise.then((map)=> { 
-
+      props.mapPromise.then((map) => {
         // newFeature set
-        newFeatures = props.playgroundLayer.features.sort(() => .5 - Math.random()).slice(0,4)
-        newFeature = newFeatures[Math.floor(Math.random() * newFeatures.length)]
-        
+        newFeatures = props.playgroundLayer.features.sort(() => 0.5 - Math.random()).slice(0, 4);
+        newFeature = newFeatures[Math.floor(Math.random() * newFeatures.length)];
         if (
           // if  previous guessing feature
           newFeature.id == guessingFeature.value.id
-          || 
           // previous attempt
-          newFeature.id == guessedFeature.value.id
+          || newFeature.id == guessedFeature.value.id
           // if  already done feature
           || gameDoneFeaturesIDs.value.includes(newFeature.id)
         )
-          setRandomFeatures()
-        
+          setRandomFeatures();
         else {
-          guessingFeature.value = newFeature;
-          guessedFeature.value = {}
-          guessingOptions.value = newFeatures;
-
-          if (props.difficulty == 'easy') {
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: guessingFeature.value.id },
-              { guessing: true }
-            );
-          }
-
+            guessingFeature.value = newFeature;
+            guessedFeature.value = {};
+            guessingOptions.value = newFeatures;
+            if (props.difficulty == "easy") {
+                map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: true });
+            }
         }
-
-      })
+      });
     }
-
     // hard mode map listeners
-    if (props.difficulty == 'hard') {
-      props.mapPromise.then((map)=> { 
+    if (props.difficulty == "hard") {
+      props.mapPromise.then((map) => {
         // hover feature color
-        map.on('mousemove', props.playgroundLayer.name+"Fill", (e) => {
-          if (e.features.length > 0 && hoveredFeatureId !== null && playState.value == 'playing') {
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: hoveredFeatureId },
-              { hover: false }
-            );
-          }
-          if (e.features.length > 0 && playState.value == 'playing') {
-            map.getCanvas().style.cursor = 'pointer'
-            hoveredFeatureId = e.features[0].id;
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: hoveredFeatureId },
-              { hover: true }
-            );
-          }
-          if (
-            (e.features.length > 0 && playState.value != 'playing')
-            || map.getFeatureState({ source: props.playgroundLayer.name, id: e.features[0].id }).done
-          )
-            map.getCanvas().style.cursor = 'not-allowed'
+        map.on("mousemove", props.playgroundLayer.name + "Fill", (e) => {
+        if (e.features.length > 0 && hoveredFeatureId !== null && playState.value == "playing") {
+          map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId }, { hover: false });
+        }
+        if (e.features.length > 0 && playState.value == "playing") {
+          map.getCanvas().style.cursor = "pointer";
+          hoveredFeatureId = e.features[0].id;
+          map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId }, { hover: true });
+        }
+        if (
+          (e.features.length > 0 && playState.value != "playing")
+          || map.getFeatureState({ source: props.playgroundLayer.name, id: e.features[0].id }).done
+        )
+          map.getCanvas().style.cursor = "not-allowed";
         });
-        map.on('mouseleave', props.playgroundLayer.name+"Fill", () => {
-          map.getCanvas().style.cursor = ''
-          if (hoveredFeatureId !== null && playState.value == 'playing') {
-            map.setFeatureState(
-              { source: props.playgroundLayer.name, id: hoveredFeatureId },
-              { hover: false }
-            );
+        map.on("mouseleave", props.playgroundLayer.name + "Fill", () => {
+          map.getCanvas().style.cursor = "";
+          if (hoveredFeatureId !== null && playState.value == "playing") {
+            map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId }, { hover: false });
           }
           hoveredFeatureId = null;
         });
-
         // user guess attempt hard
-        map.on(
-          'click',
-          props.playgroundLayer.name+"Fill",
-          (clickedFeature) =>
-            guess(clickedFeature.features[0])
-        )
-      })
+        map.on("click", props.playgroundLayer.name + "Fill", (clickedFeature) => guess(clickedFeature.features[0]));
+      });
     }
-
     return {
       success,
       guessingFeature,
@@ -397,7 +304,6 @@ export default defineComponent({
       play,
       next,
       replay,
-      restart,
       guess,
       score,
       playState,
@@ -406,12 +312,8 @@ export default defineComponent({
       nbSuccess,
       bestScore,
     };
-  },
+  }
 });
 </script>
 
-<style scoped>
-
-
-
-</style>
+<style scoped></style>

@@ -90,6 +90,7 @@ body {
   font-size: .95rem;
   position: relative;
   right: 0;
+  left: 0;
 }
 
 /* LOADER */
@@ -434,6 +435,7 @@ body {
 
   .title-text {
     font-size: 2.5vh;
+    line-height: 3.5vh;
   }
 
   .title-logo {
@@ -555,13 +557,15 @@ body {
   .game-menu-instruction-text {
     display: none; 
   }
-
-
+  
+  .credit {
+    left: 2vh;
+    right: auto;
+  }
 }
 
 @media screen and (max-width: 650px) {
   .credit {
-    font-size: .5rem;
+    font-size: .55rem;
   }
-
 }

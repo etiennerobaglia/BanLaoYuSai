@@ -1,25 +1,8 @@
 <template>
-  
-  <div
-    class="overlay"
-    :class="{
-      'hide': mapLoaded
-    }"
-  >
-  
-    <div class="header">
-      <div class="title-container">
-        <div class="loader"></div>
-        <div class="title-text">
-          ບ້ານ ລາວ ຢູ່ໃສ<br>Ban Lao Yu Sai
-          <a class="credit" href="https://etienne.robaglia.fr">
-            etienne.robaglia.fr
-          </a>
-        </div>
-      </div>
-    </div>
+  <Overlay
+    :mapLoaded="mapLoaded"
+  />
 
-  </div>
 
   <main class="game">
     
@@ -34,16 +17,13 @@
           ບ້ານ ລາວ ຢູ່ໃສ<br>Ban Lao Yu Sai
         </div>
       </div>
-      
     </div>
     
     <div id="game-modal"></div>
 
     <div class="game-menu-container">
       <div class="game-menu">
-
         <GameSelection :mapPromise="mapPromise" />
-      
       </div>
     </div>
 
@@ -51,18 +31,19 @@
   <a class="credit" href="https://etienne.robaglia.fr">
     etienne.robaglia.fr
   </a>
-  
 </template>
 
 <script>
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { onMounted, ref } from "vue";
+import Overlay from './components/Overlay.vue';
 import GameSelection from './components/GameSelection.vue';
 
 export default {
   name: 'App',
   components: {
+    Overlay,
     GameSelection
   },
   setup() {
