@@ -1,4 +1,26 @@
 <template>
+  
+  <div
+    class="overlay"
+    :class="{
+      'hide': mapLoaded
+    }"
+  >
+  
+    <div class="header">
+      <div class="title-container">
+        <div class="loader"></div>
+        <div class="title-text">
+          ບ້ານ ລາວ ຢູ່ໃສ<br>Ban Lao Yu Sai
+          <a class="credit" href="https://etienne.robaglia.fr">
+            etienne.robaglia.fr
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
   <main class="game">
     
     <div class="map-container">
@@ -45,6 +67,7 @@ export default {
   },
   setup() {
     const mapPromise = ref();
+    const mapLoaded = ref(false);
     
     onMounted(() => {
       mapboxgl.accessToken = import.meta.env.VITE_VUE_APP_MAPBOX_TOKEN;
@@ -59,12 +82,17 @@ export default {
       });
 
       mapPromise.value = new Promise((resolve) => {
-        map.on('load', () => resolve(map));
+        map.on('load', () => {
+          resolve(map)
+          mapLoaded.value = true;
+        }
+          );
       });
 
     });
     return {
       mapPromise,
+      mapLoaded
     };
   },
 };
