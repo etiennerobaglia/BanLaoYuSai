@@ -453,7 +453,7 @@ body {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto 1fr auto;
     padding: 2vh;
-    gap: 2vh;
+    gap: 1.5vh;
   }
 
   .header {
@@ -519,24 +519,28 @@ body {
   .game-menu-finished {
     display: flex;
     flex-direction: column;
-    gap: 2vh;
+    gap: 1vh;
     width: 100%;
   }
 
 
   .game-menu select, .game-menu .button {
-    padding: 1.75vh;
+    padding: .75rem;
     padding-right: 30px;
     margin: 0;
   }
 
   .game-menu .button-selection {
-    padding: .75rem 0;
+    padding: .2rem 0;
   }
 
   .game-menu .game-menu-info .button-selection.button-not-hoverable {
     font-size: 1.1rem;
     padding: 0;
+  }
+
+  .game-menu .game-menu-info .button-selection.button-not-hoverable:not(:first-of-type){
+    margin-top: 1vh;
   }
 
   .game-menu .button-yellow, 

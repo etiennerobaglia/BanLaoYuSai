@@ -10,9 +10,22 @@
         name="game-menu-difficulty"
       >
         <option disabled value="">- Select Playground -</option>
-        <option v-for="layer in layersInfo" :value="layer.fileName">
-          {{ layer.fullName }}
-        </option>
+        <optgroup label="Vientiane">
+          <option 
+            v-for="layer in layersInfo.filter(layer => layer.fileName.includes('vte'))" 
+            :value="layer.fileName"
+          >
+            {{ layer.fullName }}
+          </option>
+        </optgroup>
+        <optgroup label="Lao">
+          <option 
+          v-for="layer in layersInfo.filter(layer => layer.fileName.includes('lao'))"
+            :value="layer.fileName"
+          >
+            {{ layer.fullName }}
+          </option>
+        </optgroup>
       </select>
     </div>
     <div class="game-menu-select">
@@ -135,9 +148,9 @@ export default defineComponent({
                 ['boolean', ['feature-state', 'hover'], false],
                 1,
                 ['boolean', ['feature-state', 'fail'], false],
-                .85,
+                1,
                 ['boolean', ['feature-state', 'success'], false],
-                .85,
+                1,
                 ['boolean', ['feature-state', 'done'], false],
                 1,
                 0
