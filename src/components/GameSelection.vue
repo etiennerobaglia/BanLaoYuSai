@@ -74,7 +74,7 @@ export default defineComponent({
     const difficulty = ref("");
     let playgroundLayer = ref({})
     let playing = ref(false)
-    let laoBounds = [[99.6585338255183, 13.7970728629234], [108.3101822387705, 22.83759711581436]];
+    let laoBounds = [[99.909668, 13.7954062], [107.9296875, 22.6951202]];
     let layersInfo = ref([
       {
         "fileName": "vte-villages-t2",
