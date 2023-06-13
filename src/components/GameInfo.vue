@@ -122,14 +122,14 @@
         :disabled="playState != 'next'"
         class="button button-yellow button-next"
       >
-      [{{ nbSuccess+nbFail }}/{{totalAttemps}}] Next Round!
+      [{{ nbSuccess+nbFail }}/{{totalAttemps}}] Next Round! {{timerTime()}}
       </button>
       <button
         v-else
         @click="score()"
         class="button button-yellow button-next"
       >
-        [{{ nbSuccess+nbFail }}/{{totalAttemps}}] See score!
+        [{{ nbSuccess+nbFail }}/{{totalAttemps}}] See score! {{timerTime()}}
       </button>
     </div>
 
@@ -153,23 +153,31 @@ export default defineComponent({
     playgroundLayer: Object,
     playgroundInfo: Object,
     difficulty: String,
+    isTimer: Boolean,
   },
   setup(props) {
-    let guessingOptions = ref([]);
-    let guessingFeature = ref({});
-    let guessedFeature = ref({});
-    let hoveredFeatureId = null;
-    let nbFail = ref(0);
-    let nbSuccess = ref(0);
-    let playState = ref("playing");
-    let success = ref(null);
-    let bestScore = ref(null);
-    let totalAttemps = ref(10);
-    let gameDoneFeaturesIDs = ref([]);
+    const guessingOptions = ref([]);
+    const guessingFeature = ref({});
+    const guessedFeature = ref({});
+    const hoveredFeatureId = ref(null);
+    const nbFail = ref(0);
+    const nbSuccess = ref(0);
+    const playState = ref("playing");
+    const success = ref(null);
+    const bestScore = ref(null);
+    const totalAttemps = ref(10);
+    const gameDoneFeaturesIDs = ref([]);
+    
+    const roundDuration = ref(10000);
+    const timer = ref();
+    const timerIntervalId = ref();
+    const timerTimeoutId = ref();
+
     onMounted(() => { play(); });
     function play() {
       setRandomFeatures();
       playState.value = "playing";
+      if (props.isTimer) setTimer();
     }
     function score() {
       // end of game
@@ -181,8 +189,9 @@ export default defineComponent({
     }
     function next() {
       props.mapPromise.then((map) => {
-        map.setFeatureState({ source: props.playgroundLayer.name, id: guessedFeature.value.id }, { fail: false, guessing: false, success: false, hover: false });
         map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { fail: false, guessing: false, success: false, hover: false });
+        if (guessedFeature.value.id)
+          map.setFeatureState({ source: props.playgroundLayer.name, id: guessedFeature.value.id }, { fail: false, guessing: false, success: false, hover: false });
         if (guessingFeature.value.id == guessedFeature.value.id) {
           map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { done: true });
         }
@@ -202,29 +211,48 @@ export default defineComponent({
     }
     function guess(guessAttempt) {
       if (
-      // playing
-      playState.value == "playing"
+        // playing
+        playState.value == "playing"
         // not a done feature (hard)
-        && (!gameDoneFeaturesIDs.value.includes(guessAttempt.id) || props.difficulty == "easy")) {
-        guessedFeature.value = guessAttempt;
+        && (!gameDoneFeaturesIDs.value.includes(guessAttempt.id) || props.difficulty == "easy")
+      ) {
+        clearInterval(timerIntervalId.value);
+        clearTimeout(timerTimeoutId.value);
         playState.value = "next";
+        guessedFeature.value = guessAttempt;
         props.mapPromise.then((map) => {
           // success
           if (guessedFeature.value.id == guessingFeature.value.id) {
             nbSuccess.value++;
-            success.value = true;
             map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: false, success: true });
             gameDoneFeaturesIDs.value.push(guessedFeature.value.id);
           }
           // fail
-          else {
-            nbFail.value++;
-            success.value = false;
-            map.setFeatureState({ source: props.playgroundLayer.name, id: guessedFeature.value.id }, { fail: true });
-            map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: true });
-          }
+          else fail()
         });
       }
+    }
+    function fail() {
+      props.mapPromise.then((map) => {
+        nbFail.value++;
+        map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: true });
+        if (guessedFeature.value.id)
+          map.setFeatureState({ source: props.playgroundLayer.name, id: guessedFeature.value.id }, { fail: true });
+      })
+    }
+    function setTimer() {
+      timer.value = roundDuration.value;
+      timerIntervalId.value = setInterval(() => {
+        timer.value = timer.value - 1000;
+      }, 1000)
+      timerTimeoutId.value = setTimeout(() => {
+        if (playState.value == 'playing') {
+          playState.value = "next";
+          guessedFeature.value.id = 'none';
+          fail()
+          clearInterval(timerIntervalId.value);
+        }
+      }, roundDuration.value + 100)
     }
     function featureFullName(feature) {
       let featureFullName;
@@ -238,6 +266,9 @@ export default defineComponent({
         featureFullName =
           feature.properties?.pname + " <br /> " + feature.properties?.l_pname;
       return featureFullName;
+    }
+    function timerTime() {
+      if (props.isTimer) return `(${timer.value/1000}s)`;
     }
     function setRandomFeatures() {
       let newFeature;
@@ -270,13 +301,12 @@ export default defineComponent({
       props.mapPromise.then((map) => {
         // hover feature color
         map.on("mousemove", props.playgroundLayer.name + "Fill", (e) => {
-        if (e.features.length > 0 && hoveredFeatureId !== null && playState.value == "playing") {
-          map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId }, { hover: false });
-        }
+        if (e.features.length > 0 && hoveredFeatureId.value !== null && playState.value == "playing")
+          map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId.value }, { hover: false });
         if (e.features.length > 0 && playState.value == "playing") {
           map.getCanvas().style.cursor = "pointer";
-          hoveredFeatureId = e.features[0].id;
-          map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId }, { hover: true });
+          hoveredFeatureId.value = e.features[0].id;
+          map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId.value }, { hover: true });
         }
         if (
           (e.features.length > 0 && playState.value != "playing")
@@ -286,10 +316,9 @@ export default defineComponent({
         });
         map.on("mouseleave", props.playgroundLayer.name + "Fill", () => {
           map.getCanvas().style.cursor = "";
-          if (hoveredFeatureId !== null && playState.value == "playing") {
-            map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId }, { hover: false });
-          }
-          hoveredFeatureId = null;
+          if (hoveredFeatureId.value !== null && playState.value == "playing")
+            map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId.value }, { hover: false });
+          hoveredFeatureId.value = null;
         });
         // user guess attempt hard
         map.on("click", props.playgroundLayer.name + "Fill", (clickedFeature) => guess(clickedFeature.features[0]));
@@ -301,12 +330,14 @@ export default defineComponent({
       guessedFeature,
       guessingOptions,
       featureFullName,
+      timerTime,
       play,
       next,
       replay,
       guess,
       score,
       playState,
+      timer,
       totalAttemps,
       nbFail,
       nbSuccess,

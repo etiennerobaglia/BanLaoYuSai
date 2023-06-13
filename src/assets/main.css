@@ -320,6 +320,49 @@ body {
 
 }
 
+/* checkbox */
+.game-menu-checkbox {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 50px;
+  height: 50px;
+  display: inline-block;
+  position: relative;
+  border: 3px solid var(--red);
+  border-radius: 3px;;
+  cursor: pointer;
+  background-color: transparent;
+  transition: background-color ease 0.2s;
+  color: var(--beige);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1rem;
+}
+.game-menu-checkbox:before {
+  font-weight: 500;
+  content: "No";
+}
+
+.game-menu-checkbox:checked {
+  background-color: var(--red);
+}
+.game-menu-checkbox:checked:before {
+  font-weight: 500;
+  content: "Yes";
+}
+
+.game-menu-select.game-menu-select-input {
+  margin-right: auto;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* END checkbox */
+
 .game-menu-buttons {
   min-height: 30%;
   display: grid;
@@ -341,7 +384,7 @@ body {
 }
 
 .game-menu .button-yellow.button-next {
-  margin-top: 2rem;
+  margin-top: 1vh;
 }
 
 .game-menu-info {
@@ -490,15 +533,6 @@ body {
     margin: 0 auto;
   }
 
-  .game-menu-difficulty {
-    width: 100%;
-    height: 100%;
-    background: var(--blue);
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-  }
-
 
   /* --------------------- */
   /* ------ MOBILE ------- */
@@ -554,7 +588,7 @@ body {
 
   /* HIDE */
 
-  .game-menu-select label {
+  .game-menu-selection-playground {
     display: none;
   } 
 

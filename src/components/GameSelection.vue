@@ -7,50 +7,60 @@
       <label class="game-menu-selection-playground">Playground</label>
       <select 
         v-model="playgroundName"
-        name="game-menu-difficulty"
+        name="game-menu-playground"
       >
         <option disabled value="">- Select Playground -</option>
-        <optgroup label="Vientiane">
-          <option 
-            v-for="layer in layersInfo.filter(layer => layer.fileName.includes('vte'))" 
-            :value="layer.fileName"
-          >
-            {{ layer.fullName }}
-          </option>
-        </optgroup>
-        <optgroup label="Lao">
-          <option 
-          v-for="layer in layersInfo.filter(layer => layer.fileName.includes('lao'))"
-            :value="layer.fileName"
-          >
-            {{ layer.fullName }}
-          </option>
-        </optgroup>
+          <optgroup label="Lao">
+            <option 
+            v-for="layer in layersInfo.filter(layer => layer.fileName.includes('lao'))"
+              :value="layer.fileName"
+            >
+              {{ layer.fullName }}
+            </option>
+          </optgroup>
+          <optgroup label="Vientiane">
+            <option 
+              v-for="layer in layersInfo.filter(layer => layer.fileName.includes('vte'))" 
+              :value="layer.fileName"
+            >
+              {{ layer.fullName }}
+            </option>
+          </optgroup>
       </select>
     </div>
-    <div class="game-menu-select">
-      <label class="game-menu-selection-difficulty">Game Difficulty</label>
-      <select 
-        v-model="difficulty" 
-        name="game-menu-difficulty"
-      >
-        <option disabled value="">-&nbsp;&nbsp;&nbsp;Select Difficulty&nbsp;&nbsp;&nbsp;-</option>
-        <option value="easy">Easy</option>
-        <option value="hard">Hard</option>
-      </select>
+    
+    <div class="game-menu-select game-menu-select-input">
+      <label class="game-menu-selection">Timer (10s)</label>
+      <input 
+        class="game-menu-checkbox"
+        type="checkbox"
+        name="game-menu-timer"
+        v-model="isTimer" />
+    </div>
+
+    <div class="game-menu-select game-menu-select-input game-menu-difficulty">
+      <label class="game-menu-selection">Hard Mode</label>
+      <input 
+        class="game-menu-checkbox"
+        type="checkbox"
+        name="game-menu-timer"
+        value="hard"
+        @click="difficulty=='easy'?difficulty='hard':difficulty='easy'"
+        />
     </div>
 
     <button
       class="button button-yellow"
-      :disabled="!playgroundName || !difficulty"
+      :disabled="!playgroundName || !difficulty || isTimer=='default'"
       @click="initGame()"
     >
       Play!
     </button>
   </div>
   <GameInfo
-    v-if="playing && difficulty && playgroundName"
+    v-if="playing && difficulty && playgroundName && isTimer!='default'"
     :difficulty="difficulty"
+    :isTimer="isTimer"
     :mapPromise="mapPromise"
     :playgroundLayer="playgroundLayer"
     :playgroundInfo="playgroundInfo"
@@ -62,20 +72,18 @@ import { defineComponent, ref } from 'vue';
 import GameInfo from './GameInfo.vue';
 
 export default defineComponent({
-  props: {
-    mapPromise: Object,
-  },
-  components: {
-    GameInfo,
-  },
+  props: {mapPromise: Object},
+  components: {GameInfo},
   setup(props) {
+    const laoBounds = [[99.909668, 13.7954062], [107.9296875, 22.6951202]];
+
     const playgroundName = ref("");
-    let playgroundInfo = ref({})
-    const difficulty = ref("");
-    let playgroundLayer = ref({})
-    let playing = ref(false)
-    let laoBounds = [[99.909668, 13.7954062], [107.9296875, 22.6951202]];
-    let layersInfo = ref([
+    const playgroundInfo = ref({})
+    const difficulty = ref("easy");
+    const isTimer = ref();
+    const playgroundLayer = ref({})
+    const playing = ref(false)
+    const layersInfo = ref([
       {
         "fileName": "vte-villages-t2",
         "fullName":"Vientiane - City Center (39 villages)",
@@ -92,11 +100,6 @@ export default defineComponent({
         "bounds": [ [102.40350167471024, 17.784056559755257], [102.87552283140121, 18.12166650874893]]
       },
       {
-        "fileName": "lao-districts",
-        "fullName":"Lao - Districts",
-        "bounds": laoBounds
-      },
-      {
         "fileName": "vte-pro_and_cap-districts",
         "fullName":"Extended Vientiane - Districts",
         "bounds": [[101.17486890018642, 17.74580310199005], [103.35160930021289, 19.45418532763813]]
@@ -104,6 +107,11 @@ export default defineComponent({
       {
         "fileName": "lao-provinces",
         "fullName":"Lao - Provinces",
+        "bounds": laoBounds
+      },
+      {
+        "fileName": "lao-districts",
+        "fullName":"Lao - Districts",
         "bounds": laoBounds
       }
     ])
@@ -185,6 +193,7 @@ export default defineComponent({
       playgroundInfo,
       playgroundLayer,
       difficulty,
+      isTimer,
       playing,
     };
   },
