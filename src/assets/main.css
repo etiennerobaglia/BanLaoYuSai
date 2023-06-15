@@ -325,8 +325,8 @@ body {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 50px;
-  height: 50px;
+  width: 43.5px;
+  height: 43.5px;
   display: inline-block;
   position: relative;
   border: 3px solid var(--red);
@@ -338,7 +338,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.1rem;
+  font-size: .95rem;
 }
 .game-menu-checkbox:before {
   font-weight: 500;
