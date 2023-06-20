@@ -9,6 +9,7 @@
       :nbFail="nbFail"
       :bestScore="bestScore"
       :totalAttemps="totalAttemps"
+      :isTimer="isTimer"
     />
   </Teleport>
     
@@ -16,7 +17,9 @@
     v-if="playState == 'finished'"
     @replay="replay()"
     :nbSuccess="nbSuccess"
-    :totalAttemps="totalAttemps"    
+    :isTimer="isTimer"
+    :totalAttemps="totalAttemps"
+    :totalTimeSpent="totalTimeSpent"
   />
 
   <div 
@@ -163,15 +166,16 @@ export default defineComponent({
     const nbFail = ref(0);
     const nbSuccess = ref(0);
     const playState = ref("playing");
-    const success = ref(null);
-    const bestScore = ref(null);
+    const bestScore = ref({
+      "nbSuccess": 0,
+      "totalTimeSpent": 0,
+    });
     const totalAttemps = ref(10);
     const gameDoneFeaturesIDs = ref([]);
-    
+    const totalTimeSpent = ref(0);
     const roundDuration = ref(10000);
     const timer = ref();
     const timerIntervalId = ref();
-    const timerTimeoutId = ref();
 
     onMounted(() => { play(); });
     function play() {
@@ -183,8 +187,12 @@ export default defineComponent({
       // end of game
       playState.value = "finished";
       // set bestscore
-      if (playState.value == "finished" && (nbSuccess.value > bestScore.value || bestScore.value == null))
-          bestScore.value = nbSuccess.value;
+      if (
+        // if nb success increased 
+        nbSuccess.value > bestScore.value.nbSuccess
+        // or if nb successis the same but timespend decrease
+        || (nbSuccess.value == bestScore.value.nbSuccess && totalTimeSpent.value < bestScore.value.totalTimeSpent)
+      ) bestScore.value = {"nbSuccess": nbSuccess.value, "totalTimeSpent": totalTimeSpent.value}
       next();
     }
     function next() {
@@ -202,8 +210,10 @@ export default defineComponent({
       });
     }
     function replay() {
+      gameDoneFeaturesIDs.value = [];
       nbSuccess.value = 0;
       nbFail.value = 0;
+      totalTimeSpent.value = 0;
       props.mapPromise.then((map) => {
         map.removeFeatureState({ source: props.playgroundLayer.name });
         play();
@@ -216,8 +226,7 @@ export default defineComponent({
         // not a done feature (hard)
         && (!gameDoneFeaturesIDs.value.includes(guessAttempt.id) || props.difficulty == "easy")
       ) {
-        clearInterval(timerIntervalId.value);
-        clearTimeout(timerTimeoutId.value);
+        stopTimer()
         playState.value = "next";
         guessedFeature.value = guessAttempt;
         props.mapPromise.then((map) => {
@@ -243,16 +252,18 @@ export default defineComponent({
     function setTimer() {
       timer.value = roundDuration.value;
       timerIntervalId.value = setInterval(() => {
-        timer.value = timer.value - 1000;
-      }, 1000)
-      timerTimeoutId.value = setTimeout(() => {
-        if (playState.value == 'playing') {
+        if (timer.value > 0) timer.value = timer.value - 100;
+        else if (playState.value == 'playing') {
           playState.value = "next";
           guessedFeature.value.id = 'none';
+          stopTimer()
           fail()
-          clearInterval(timerIntervalId.value);
         }
-      }, roundDuration.value + 100)
+      }, 100)
+    }
+    function stopTimer() {
+      clearInterval(timerIntervalId.value);
+      totalTimeSpent.value = totalTimeSpent.value + (roundDuration.value - timer.value);
     }
     function featureFullName(feature) {
       let featureFullName;
@@ -268,33 +279,32 @@ export default defineComponent({
       return featureFullName;
     }
     function timerTime() {
-      if (props.isTimer) return `(${timer.value/1000}s)`;
+      if (props.isTimer) return `(${Math.round(timer.value/1000)}s)`;
     }
     function setRandomFeatures() {
-      let newFeature;
-      let newFeatures;
-      props.mapPromise.then((map) => {
-        // newFeature set
-        newFeatures = props.playgroundLayer.features.sort(() => 0.5 - Math.random()).slice(0, 4);
-        newFeature = newFeatures[Math.floor(Math.random() * newFeatures.length)];
+      let availableFeatures = []
+      props.playgroundLayer.features.forEach((feature) => {
         if (
-          // if  previous guessing feature
-          newFeature.id == guessingFeature.value.id
-          // previous attempt
-          || newFeature.id == guessedFeature.value.id
           // if  already done feature
-          || gameDoneFeaturesIDs.value.includes(newFeature.id)
-        )
-          setRandomFeatures();
-        else {
-            guessingFeature.value = newFeature;
-            guessedFeature.value = {};
-            guessingOptions.value = newFeatures;
-            if (props.difficulty == "easy") {
-                map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: true });
-            }
-        }
-      });
+          !gameDoneFeaturesIDs.value.includes(feature.id)
+          && 
+          // if  previous guessing feature
+          feature.id != guessingFeature.value.id
+          &&
+          // if  previous attempted feature
+          feature.id != guessedFeature.value.id
+        ) 
+        availableFeatures.push(feature)
+      })
+      // newFeature set
+      guessingOptions.value = availableFeatures.sort(() => 0.5 - Math.random()).slice(0, 4);
+      guessingFeature.value = guessingOptions.value[Math.floor(Math.random() * guessingOptions.value.length)];
+      guessedFeature.value = {};
+      if (props.difficulty == "easy") {
+        props.mapPromise.then((map) => {   
+          map.setFeatureState({ source: props.playgroundLayer.name, id: guessingFeature.value.id }, { guessing: true });
+        })
+      }
     }
     // hard mode map listeners
     if (props.difficulty == "hard") {
@@ -325,7 +335,6 @@ export default defineComponent({
       });
     }
     return {
-      success,
       guessingFeature,
       guessedFeature,
       guessingOptions,
@@ -338,6 +347,7 @@ export default defineComponent({
       score,
       playState,
       timer,
+      totalTimeSpent,
       totalAttemps,
       nbFail,
       nbSuccess,

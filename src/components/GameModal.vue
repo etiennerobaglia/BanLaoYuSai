@@ -17,8 +17,11 @@
           <span>{{ nbFail }}</span>
         </div>
       </div>
-      <div class="game-menu-best-score" v-if="bestScore != null"> 
-        Best Score: {{ bestScore }}/{{totalAttemps}}
+      <div class="game-menu-best-score"
+        v-if="bestScore.nbSuccess != 0"
+      > 
+        Best Score: {{ bestScore.nbSuccess }}/{{totalAttemps}}
+        <span v-if="bestScore.totalTimeSpent"> in {{ bestScore.totalTimeSpent/1000 }}s</span>
       </div>
     </div>
   </Teleport>
@@ -32,8 +35,9 @@ export default defineComponent({
   props: {
     nbSuccess: Number,
     nbFail: Number,
-    bestScore: Number,
     totalAttemps: Number,
+    bestScore: Object,
+    isTimer: Boolean,
   }
 });
 </script>

@@ -2,7 +2,8 @@
   <div class="game-menu-info">
     <div class="game-menu-feedback">
       <div class="game-menu-finished">
-        Congratulation, your score is {{ nbSuccess }}/{{ totalAttemps }}!
+        <span>Congratulation, your score is {{ nbSuccess }}/{{ totalAttemps }}<span v-if="isTimer"> in {{ totalTimeSpent/1000}} seconds</span>!</span>
+        
         <button 
           @click="$emit('replay')"
           class="button button-yellow"
@@ -29,6 +30,8 @@ export default defineComponent({
   props: {
     nbSuccess: Number,
     totalAttemps: Number,
+    totalTimeSpent: Number,
+    isTimer: Boolean,
   },
   setup(props) {
     function restart() {
