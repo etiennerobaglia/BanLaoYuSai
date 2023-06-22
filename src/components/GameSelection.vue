@@ -64,6 +64,7 @@
     :mapPromise="mapPromise"
     :playgroundLayer="playgroundLayer"
     :playgroundInfo="playgroundInfo"
+    @restart="restart()"
   />
 </template>
 
@@ -76,7 +77,6 @@ export default defineComponent({
   components: {GameInfo},
   setup(props) {
     const laoBounds = [[99.909668, 13.7954062], [107.9296875, 22.6951202]];
-
     const playgroundName = ref("");
     const playgroundInfo = ref({})
     const difficulty = ref("easy");
@@ -185,10 +185,13 @@ export default defineComponent({
         playing.value = true;
       });
     }
-
+    function restart() {
+      playing.value = false
+    }
     return {
       layersInfo,
       initGame,
+      restart,
       playgroundName,
       playgroundInfo,
       playgroundLayer,

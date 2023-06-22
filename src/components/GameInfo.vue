@@ -16,6 +16,7 @@
   <GameFinished
     v-if="playState == 'finished'"
     @replay="replay()"
+    @restart="restart(); $emit('restart')"
     :nbSuccess="nbSuccess"
     :isTimer="isTimer"
     :totalAttemps="totalAttemps"
@@ -219,6 +220,19 @@ export default defineComponent({
         play();
       });
     }
+    function restart() {
+      gameDoneFeaturesIDs.value = [];
+      nbSuccess.value = 0;
+      nbFail.value = 0;
+      totalTimeSpent.value = 0;
+      bestScore.value = {
+        "nbSuccess": 0,
+        "totalTimeSpent": 0,
+      }
+      props.mapPromise.then((map) => {
+        map.removeFeatureState({ source: props.playgroundLayer.name });
+      });
+    }
     function guess(guessAttempt) {
       if (
         // playing
@@ -343,6 +357,7 @@ export default defineComponent({
       play,
       next,
       replay,
+      restart,
       guess,
       score,
       playState,

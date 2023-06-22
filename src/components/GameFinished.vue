@@ -11,10 +11,10 @@
           Replay this mode!
         </button>
         <button
-          @click="restart()"
+          @click="$emit('restart')"
           class="button button-yellow"
         >
-          Choose new game mode!
+          Select another game mode
         </button>
       </div>
 
@@ -32,14 +32,6 @@ export default defineComponent({
     totalAttemps: Number,
     totalTimeSpent: Number,
     isTimer: Boolean,
-  },
-  setup(props) {
-    function restart() {
-      location.reload();
-    }
-    return {
-      restart
-    };
   }
 });
 </script>
