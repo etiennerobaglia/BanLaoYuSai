@@ -3,11 +3,13 @@
     :mapLoaded="mapLoaded"
   />
 
-
   <main class="game">
     
-    <div class="map-container">
-      <div id="map"></div>
+    <div class="main-container" id="main-container">
+      <div 
+        v-show="isPlaying != 'finished'"
+        id="map"
+      ></div>
     </div>
 
     <div class="header">
@@ -36,9 +38,10 @@
 <script>
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import Overlay from './components/Overlay.vue';
 import GameSelection from './components/GameSelection.vue';
+import { useStore } from 'vuex';
 
 export default {
   name: 'App',
@@ -49,7 +52,10 @@ export default {
   setup() {
     const mapPromise = ref();
     const mapLoaded = ref(false);
-    
+    const store = useStore();
+    const isPlaying = computed(() => store.state.isPlaying);
+    const isTimer = computed(() => store.state.isTimer);
+
     onMounted(() => {
       mapboxgl.accessToken = import.meta.env.VITE_VUE_APP_MAPBOX_TOKEN;
       
@@ -73,7 +79,9 @@ export default {
     });
     return {
       mapPromise,
-      mapLoaded
+      mapLoaded,
+      isPlaying,
+      isTimer
     };
   },
 };

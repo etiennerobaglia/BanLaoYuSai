@@ -159,6 +159,7 @@ export default defineComponent({
     difficulty: String,
     isTimer: Boolean,
   },
+  emits: ["restart"],
   setup(props) {
     const guessingOptions = ref([]);
     const guessingFeature = ref({});
@@ -194,6 +195,7 @@ export default defineComponent({
         // or if nb successis the same but timespend decrease
         || (nbSuccess.value == bestScore.value.nbSuccess && totalTimeSpent.value < bestScore.value.totalTimeSpent)
       ) bestScore.value = {"nbSuccess": nbSuccess.value, "totalTimeSpent": totalTimeSpent.value}
+      this.$store.commit('isPlaying', "finished");
       next();
     }
     function next() {
@@ -219,6 +221,7 @@ export default defineComponent({
         map.removeFeatureState({ source: props.playgroundLayer.name });
         play();
       });
+      this.$store.commit('isPlaying', "started");
     }
     function restart() {
       gameDoneFeaturesIDs.value = [];
@@ -232,6 +235,7 @@ export default defineComponent({
       props.mapPromise.then((map) => {
         map.removeFeatureState({ source: props.playgroundLayer.name });
       });
+      this.$store.commit('isPlaying', "notStarted");
     }
     function guess(guessAttempt) {
       if (

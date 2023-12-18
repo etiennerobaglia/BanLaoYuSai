@@ -17,12 +17,12 @@
           <span>{{ nbFail }}</span>
         </div>
       </div>
-      <div class="game-menu-best-score"
+      <!-- <div class="game-menu-best-score"
         v-if="bestScore.nbSuccess != 0"
       > 
         Best Score: {{ bestScore.nbSuccess }}/{{totalAttemps}}
         <span v-if="bestScore.totalTimeSpent"> in {{ bestScore.totalTimeSpent/1000 }}s</span>
-      </div>
+      </div> -->
     </div>
   </Teleport>
 </template>

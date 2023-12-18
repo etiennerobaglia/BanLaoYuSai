@@ -30,7 +30,7 @@
     </div>
     
     <div class="game-menu-select game-menu-select-input">
-      <label class="game-menu-selection">Timer (10s)</label>
+      <label class="game-menu-selection">Ranked</label>
       <input 
         class="game-menu-checkbox"
         type="checkbox"
@@ -74,6 +74,7 @@ import GameInfo from './GameInfo.vue';
 
 export default defineComponent({
   props: {mapPromise: Object},
+  emits: ['restart'],
   components: {GameInfo},
   setup(props) {
     const laoBounds = [[99.909668, 13.7954062], [107.9296875, 22.6951202]];
@@ -183,6 +184,11 @@ export default defineComponent({
           )
         })
         playing.value = true;
+        this.$store.commit('isPlaying', "started")
+        this.$store.commit('isTimer', isTimer)
+        this.$store.commit('difficulty', difficulty)
+        this.$store.commit('playgroundFullName', playgroundInfo.value.fullName)
+        this.$store.commit('playgroundFileName', playgroundInfo.value.fileName)
       });
     }
     function restart() {

@@ -4,4 +4,4 @@ An online game to learn Lao PDR geography.
 
 Data are from [K4D Lao PDR](https://apps.k4d.la/explorer/).
 
-[Vue 3](https://vuejs.org/), [mapbox](https://www.mapbox.com/).
+[Vue 3](https://vuejs.org/), [mapbox](https://www.mapbox.com/), and [supabase](https://supabase.com/).
