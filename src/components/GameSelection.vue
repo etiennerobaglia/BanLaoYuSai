@@ -81,7 +81,7 @@ export default defineComponent({
     const playgroundName = ref("");
     const playgroundInfo = ref({})
     const difficulty = ref("easy");
-    const isTimer = ref();
+    const isTimer = ref(false);
     const playgroundLayer = ref({})
     const playing = ref(false)
     const layersInfo = ref([
