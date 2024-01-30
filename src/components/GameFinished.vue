@@ -151,7 +151,7 @@ export default defineComponent({
     async function pushItAll() {
       if (isTimer) {
         const { data, error } = await supabase
-          .from('test_scores')
+          .from('scores')
           .insert({
             player_name: "score_not_pushed",
             playground: playgroundFileName.value,
