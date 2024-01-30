@@ -92,7 +92,6 @@ export default defineComponent({
       let {data, error} = await supabase
       .from('scores')
       .select('*')
-      .not('player_name', 'eq', 'score_not_pushed')
       .eq('playground', playgroundFileName.value)
       .eq('hard_mode', difficulty.value == "hard")
       .order('nb_success', { ascending: false }) // Order by nb_success descending
@@ -151,9 +150,9 @@ export default defineComponent({
     async function pushItAll() {
       if (isTimer) {
         const { data, error } = await supabase
-          .from('scores')
+          .from('stats')
           .insert({
-            player_name: "score_not_pushed",
+            player_name: "stat",
             playground: playgroundFileName.value,
             hard_mode: difficulty.value == "hard",
             nb_success: props.nbSuccess,
