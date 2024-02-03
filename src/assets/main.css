@@ -17,7 +17,7 @@
 .beige { color: var(--beige) }
 .red { color: var(--red) }
 .yellow { color: var(--beige) }
-.coral { color: var(--beige) }
+.coral { color: var(--beige)}
 .green { color: var(--green )}
 
 /* --------------------- */
@@ -49,21 +49,21 @@ hr {
 .game {
   width: 100%;
   height: 100%;
-  padding: 2vh;
+  padding: 2dvh;
   display: grid;
   grid-template-columns: 1fr auto minmax(300px, 20%); 
   grid-template-rows: auto 1fr; 
-  gap: 2vh;
+  gap: 2dvh;
 }
 
 .credit {
   font-size: .65rem;
   color:var(--beige);
   text-decoration: none;
-  line-height: 2vh;
+  line-height: 2dvh;
   position:fixed;
   bottom: 0;
-  right: 2vh;
+  right: 2dvh;
   font-weight: 500;
 }
 .credit:hover {
@@ -76,8 +76,8 @@ hr {
 
 .overlay {
   position: fixed;
-  height: 100vh;
-  width: 100vw;
+  height: 100dvh;
+  width: 100dvw;
   background: var(--blue);
   display: flex;
   justify-content: space-evenly;
@@ -233,15 +233,15 @@ hr {
 }
 
 .game-menu-finished {
-  margin-top: 8vh;
+  margin-top: 8dvh;
 }
 
 .game-menu-feedback {width: 100%;}
 
 .game-menu .game-menu-title {
   color: var(--blue);
-  border-radius: 100vh;
-  font-size: 2.8vh;
+  border-radius: 100dvh;
+  font-size: 2.8dvh;
 }
 
 .game-menu-instruction-text {
@@ -289,7 +289,7 @@ hr {
   height: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 6vh;
+  margin-top: 6dvh;
 }
 
 .title-text {
@@ -397,7 +397,7 @@ hr {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 1vh;
+  gap: 1dvh;
 }
 
 .game-menu .button {
@@ -413,7 +413,7 @@ hr {
 }
 
 .game-menu .button-yellow.button-next {
-  margin-top: 1vh;
+  margin-top: 1dvh;
 }
 
 .game-menu-info {
@@ -471,7 +471,7 @@ hr {
   font-size: 1.2rem;
 }
 .game-menu .game-menu-info .button-selection.button-not-hoverable:not(:first-of-type){
-  margin-top: 2vh;
+  margin-top: 2dvh;
 }
 
 .game-menu .button:not(:disabled):not(.button-not-hoverable):hover {
@@ -506,14 +506,14 @@ hr {
   }
 
   .title-text {
-    font-size: 2.5vh;
-    line-height: 3.5vh;
+    font-size: 2.5dvh;
+    line-height: 3.5dvh;
   }
 
   .title-logo {
-    width: 6vh;
-    height: 6vh;
-    margin-right: 2vh;
+    width: 6dvh;
+    height: 6dvh;
+    margin-right: 2dvh;
   }
   
   /* --------------------- */
@@ -524,8 +524,8 @@ hr {
   .game {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto 1fr auto;
-    padding: 2vh;
-    gap: 1.5vh;
+    padding: 2dvh;
+    gap: 1.5dvh;
   }
 
   .header {
@@ -582,7 +582,7 @@ hr {
   .game-menu-finished {
     display: flex;
     flex-direction: column;
-    gap: 1vh;
+    gap: 1dvh;
     width: 100%;
   }
 
@@ -603,7 +603,7 @@ hr {
   }
 
   .game-menu .game-menu-info .button-selection.button-not-hoverable:not(:first-of-type){
-    margin-top: 1vh;
+    margin-top: 1dvh;
   }
 
   .game-menu .button-yellow, 
@@ -626,7 +626,7 @@ hr {
   }
   
   .credit {
-    left: 2vh;
+    left: 2dvh;
     right: auto;
   }
 }
