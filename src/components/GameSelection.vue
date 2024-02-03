@@ -244,7 +244,12 @@ export default defineComponent({
       });
     }
     function restart() {
-      playing.value = false
+      playing.value = false;
+      props.mapPromise.then((map) => {
+        if (map.getLayer(playgroundLayer.value.name)) map.removeLayer(playgroundLayer.value.name)
+        if (map.getLayer(playgroundLayer.value.name+"Line")) map.removeLayer(playgroundLayer.value.name+"Line")
+        if (map.getSource(playgroundLayer.value.name)) map.removeSource(playgroundLayer.value.name)
+      })
     }
     return {
       layersInfo,
