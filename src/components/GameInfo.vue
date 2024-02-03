@@ -285,7 +285,10 @@ export default defineComponent({
     }
     function featureFullName(feature) {
       let featureFullName;
-      if (feature.properties?.vname)
+      if (feature.properties?.name_en)
+        featureFullName =
+          feature.properties?.name_en + " <br /> " + feature.properties?.name_lo;
+      else if (feature.properties?.vname)
         featureFullName =
           feature.properties?.vname + " <br /> " + feature.properties?.l_vname;
       else if (feature.properties?.dname)
@@ -328,7 +331,7 @@ export default defineComponent({
     if (props.difficulty == "hard") {
       props.mapPromise.then((map) => {
         // hover feature color
-        map.on("mousemove", props.playgroundLayer.name + "Fill", (e) => {
+        map.on("mousemove", props.playgroundLayer.name, (e) => {
         if (e.features.length > 0 && hoveredFeatureId.value !== null && playState.value == "playing")
           map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId.value }, { hover: false });
         if (e.features.length > 0 && playState.value == "playing") {
@@ -342,14 +345,14 @@ export default defineComponent({
         )
           map.getCanvas().style.cursor = "not-allowed";
         });
-        map.on("mouseleave", props.playgroundLayer.name + "Fill", () => {
+        map.on("mouseleave", props.playgroundLayer.name, () => {
           map.getCanvas().style.cursor = "";
           if (hoveredFeatureId.value !== null && playState.value == "playing")
             map.setFeatureState({ source: props.playgroundLayer.name, id: hoveredFeatureId.value }, { hover: false });
           hoveredFeatureId.value = null;
         });
         // user guess attempt hard
-        map.on("click", props.playgroundLayer.name + "Fill", (clickedFeature) => guess(clickedFeature.features[0]));
+        map.on("click", props.playgroundLayer.name, (clickedFeature) => guess(clickedFeature.features[0]));
       });
     }
     return {

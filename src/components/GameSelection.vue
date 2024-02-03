@@ -78,6 +78,7 @@ export default defineComponent({
   components: {GameInfo},
   setup(props) {
     const laoBounds = [[99.909668, 13.7954062], [107.9296875, 22.6951202]];
+    const vientianeBounds = [[102.52367049329712,17.88439633410357], [102.721931487635, 18.03925442276218]];
     const playgroundName = ref("");
     const playgroundInfo = ref({})
     const difficulty = ref("easy");
@@ -93,12 +94,17 @@ export default defineComponent({
       {
         "fileName": "vte-villages-t4",
         "fullName":"Vientiane - T4 (112 villages)",
-        "bounds": [[102.52367049329712,17.88439633410357], [102.721931487635, 18.03925442276218]]
+        "bounds": vientianeBounds
       },
       {
         "fileName": "vte-villages-450",
         "fullName":"Vientiane - Road 450 (250 villages)",
         "bounds": [ [102.40350167471024, 17.784056559755257], [102.87552283140121, 18.12166650874893]]
+      },
+      {
+        "fileName": "vte-poi",
+        "fullName":"Vientiane - Point of Interest",
+        "bounds": vientianeBounds
       },
       {
         "fileName": "vte-pro_and_cap-districts",
@@ -113,6 +119,11 @@ export default defineComponent({
       {
         "fileName": "lao-districts",
         "fullName":"Lao - Districts",
+        "bounds": laoBounds
+      },
+      {
+        "fileName": "lao-conservation-areas",
+        "fullName":"Lao - Conservation Areas",
         "bounds": laoBounds
       }
     ])
@@ -130,53 +141,94 @@ export default defineComponent({
             type: "geojson",
             data: playgroundLayer.value,
           });
-          map.addLayer({
-            id: playgroundLayer.value.name+"Fill",
-            type: "fill",
-            source: playgroundLayer.value.name,
-            layout: {},
-            paint: {
-              'fill-color': [
-                'case',
-                  ['boolean', ['feature-state', 'fail'], false],
-                  import.meta.env.VITE_red,
-                  ['boolean', ['feature-state', 'success'], false],
-                  import.meta.env.VITE_green,
-                  ['boolean', ['feature-state', 'done'], false],
-                  import.meta.env.VITE_blue,
+          if (playgroundLayer.value.features[0].geometry.type == "Polygon") {
+            map.addLayer({
+              id: playgroundLayer.value.name,
+              type: "fill",
+              source: playgroundLayer.value.name,
+              layout: {},
+              paint: {
+                'fill-color': [
+                  'case',
+                    ['boolean', ['feature-state', 'fail'], false],
+                    import.meta.env.VITE_red,
+                    ['boolean', ['feature-state', 'success'], false],
+                    import.meta.env.VITE_green,
+                    ['boolean', ['feature-state', 'done'], false],
+                    import.meta.env.VITE_blue,
+                    ['boolean', ['feature-state', 'guessing'], false],
+                    import.meta.env.VITE_yellow,
+                    ['boolean', ['feature-state', 'hover'], false],
+                    import.meta.env.VITE_yellow,
+                    'black'
+                ],
+                'fill-opacity': [
+                  'case',
                   ['boolean', ['feature-state', 'guessing'], false],
-                  import.meta.env.VITE_yellow,
+                  1,
                   ['boolean', ['feature-state', 'hover'], false],
-                  import.meta.env.VITE_yellow,
-                  'black'
-              ],
-              'fill-opacity': [
-                'case',
-                ['boolean', ['feature-state', 'guessing'], false],
-                1,
-                ['boolean', ['feature-state', 'hover'], false],
-                1,
-                ['boolean', ['feature-state', 'fail'], false],
-                1,
-                ['boolean', ['feature-state', 'success'], false],
-                1,
-                ['boolean', ['feature-state', 'done'], false],
-                1,
-                0
-              ]
-            },
-          });
-
-          map.addLayer({
-            id: playgroundLayer.value.name+"Line",
-            type: "line",
-            source: playgroundLayer.value.name,
-            layout: {},
-            paint: {
-              'line-color': import.meta.env.VITE_blue,
-              'line-width': 1.5
-            },
-          });
+                  1,
+                  ['boolean', ['feature-state', 'fail'], false],
+                  1,
+                  ['boolean', ['feature-state', 'success'], false],
+                  1,
+                  ['boolean', ['feature-state', 'done'], false],
+                  1,
+                  0
+                ]
+              },
+            });
+            map.addLayer({
+              id: playgroundLayer.value.name+"Line",
+              type: "line",
+              source: playgroundLayer.value.name,
+              layout: {},
+              paint: {
+                'line-color': import.meta.env.VITE_blue,
+                'line-width': 1.5
+              },
+            });
+          }
+          if (playgroundLayer.value.features[0].geometry.type == "Point") {
+            map.addLayer({
+              id: playgroundLayer.value.name,
+              type: "circle",
+              source: playgroundLayer.value.name,
+              layout: {},
+              paint: {
+                'circle-color': [
+                  'case',
+                    ['boolean', ['feature-state', 'fail'], false],
+                    import.meta.env.VITE_red,
+                    ['boolean', ['feature-state', 'success'], false],
+                    import.meta.env.VITE_green,
+                    ['boolean', ['feature-state', 'done'], false],
+                    import.meta.env.VITE_blue,
+                    ['boolean', ['feature-state', 'guessing'], false],
+                    import.meta.env.VITE_yellow,
+                    ['boolean', ['feature-state', 'hover'], false],
+                    import.meta.env.VITE_yellow,
+                    'rgba(255,255,255,0)'
+                  ],
+                'circle-radius': 7,
+                'circle-stroke-color': [
+                  'case',
+                    ['boolean', ['feature-state', 'fail'], false],
+                    import.meta.env.VITE_red,
+                    ['boolean', ['feature-state', 'success'], false],
+                    import.meta.env.VITE_green,
+                    ['boolean', ['feature-state', 'done'], false],
+                    import.meta.env.VITE_blue,
+                    ['boolean', ['feature-state', 'guessing'], false],
+                    import.meta.env.VITE_blue,
+                    ['boolean', ['feature-state', 'hover'], false],
+                    'brown',
+                    import.meta.env.VITE_blue
+                ],
+                'circle-stroke-width': 2, 
+              },
+            });
+          }
 
           map.fitBounds(
             playgroundInfo.value.bounds,
