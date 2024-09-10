@@ -285,7 +285,11 @@ export default defineComponent({
     }
     function featureFullName(feature) {
       let featureFullName;
-      if (feature.properties?.name_en)
+      if (feature.properties?.NAME)
+        featureFullName = feature.properties?.NAME;
+      else if (feature.properties?.nom)
+        featureFullName = feature.properties?.nom;
+      else if (feature.properties?.name_en)
         featureFullName =
           feature.properties?.name_en + " <br /> " + feature.properties?.name_lo;
       else if (feature.properties?.vname)

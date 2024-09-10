@@ -26,6 +26,14 @@
               {{ layer.fullName }}
             </option>
           </optgroup>
+          <optgroup label="Europe">
+            <option 
+            v-for="layer in layersInfo.filter(layer => layer.fileName.includes('europe'))"
+              :value="layer.fileName"
+            >
+              {{ layer.fullName }}
+            </option>
+          </optgroup>
       </select>
     </div>
     
@@ -86,6 +94,21 @@ export default defineComponent({
     const playgroundLayer = ref({})
     const playing = ref(false)
     const layersInfo = ref([
+      {
+        "fileName": "europe-countries",
+        "fullName":"European Countries",
+        "bounds": [[-28.83, 70.07], [51.68, 32.33]],
+      }, 
+      {
+        "fileName": "europe-france-metro-pnr-pnx",
+        "fullName":"France - Parcs Naturels Metropolitains",
+        "bounds": [[-7.08,51.59], [ 10.77, 41.05]],
+      }, 
+      {
+        "fileName": "europe-france-dpt",
+        "fullName":"France - Départements Metropolitains",
+        "bounds": [[-7.08,51.59], [ 10.77, 41.05]],
+      }, 
       {
         "fileName": "vte-villages-t2",
         "fullName":"Vientiane - City Center (39 villages)",
