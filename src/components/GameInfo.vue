@@ -287,6 +287,10 @@ export default defineComponent({
       let featureFullName;
       if (feature.properties?.NAME)
         featureFullName = feature.properties?.NAME;
+      // france DPT
+      else if (feature.properties?.nom && feature.properties?.code)
+      featureFullName = feature.properties?.nom + " (" + feature.properties?.code + ")";
+      // france PNR
       else if (feature.properties?.nom)
         featureFullName = feature.properties?.nom;
       else if (feature.properties?.name_en)
